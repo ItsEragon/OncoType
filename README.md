@@ -35,7 +35,6 @@ Clone this repository:
 
 Install required dependencies:
 
-   ```bash
    pip install -r requirements.txt
 
 Open the training and inference notebook:
