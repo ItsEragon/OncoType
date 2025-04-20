@@ -10,6 +10,14 @@ from pytorch_grad_cam.utils.image import show_cam_on_image
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 import numpy as np
 import matplotlib.pyplot as plt
+import base64
+from io import BytesIO
+
+def image_to_base64(image):
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    return img_str
 
 # Model setup
 NUM_CLASSES = 4  # Updated to match the trained model
@@ -111,7 +119,10 @@ st.markdown("""
     
     .navbar-brand img {
         height: 32px;
+        width: 32px;
         margin-right: 12px;
+        display: inline-block;
+        vertical-align: middle;
     }
     
     .navbar-links {
@@ -199,6 +210,17 @@ st.markdown("""
         font-weight: 700;
         letter-spacing: 1px;
         text-shadow: 0 2px 10px rgba(139, 185, 254, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .main-header h1 img {
+        height: 48px;
+        width: 48px;
+        margin-right: 15px;
+        display: inline-block;
+        vertical-align: middle;
     }
     
     .main-header p {
@@ -411,6 +433,74 @@ st.markdown("""
             margin-top: 150px; /* Adjusted for mobile */
         }
     }
+
+    /* Center alignment container */
+    .center-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(30, 30, 60, 0.6), rgba(14, 17, 23, 0.8));
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(139, 185, 254, 0.1);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        margin: 0 auto 2rem auto;
+        max-width: 450px;
+        width: 100%;
+    }
+
+    .image-container img {
+        border-radius: 8px;
+        width: auto !important;
+        height: auto;
+        max-width: 400px !important;
+        max-height: 400px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .status-container {
+        background: rgba(15, 74, 0, 0.8);
+        color: #ffffff;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        max-width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .progress-container {
+        max-width: 300px;
+        margin: 1rem auto;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .section-header h2 {
+        display: inline-block;
+        position: relative;
+        color: #8bb9fe;
+        margin-bottom: 1.5rem;
+        font-size: 2.2rem;
+        font-weight: 700;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -419,7 +509,8 @@ st.markdown("""
 st.markdown("""
 <div class="navbar">
     <a href="#" class="navbar-brand">
-        <span>🩸 OncoType</span>
+        <img src="https://images.vexels.com/media/users/3/145502/isolated/preview/9824e521b3d8c5e4f893b269cf6f9128-breast-cancer-ribbon.png" alt="OncoType Logo">
+        <span>OncoType</span>
     </a>
     <div class="navbar-links">
         <a href="#home" class="navbar-link active">Home</a>
@@ -440,7 +531,10 @@ st.markdown("""
 st.markdown("""
 <div id="home" class="hero-section">
     <div class="main-header">
-        <h1>🧬 OncoType</h1>
+        <h1>
+            <img src="https://images.vexels.com/media/users/3/145502/isolated/preview/9824e521b3d8c5e4f893b269cf6f9128-breast-cancer-ribbon.png" alt="OncoType Logo">
+            OncoType
+        </h1>
         <p>Transform microscopic images of blood smears into detailed descriptions with our advanced AI vision technology. Powered by state-of-the-art machine learning models to see and understand the Acute Lymphoblastic Leukemia(ALL),  i.e. Blood Cancer.</p>
     </div>
 </div>
@@ -477,58 +571,81 @@ if uploaded_file:
     # Display uploaded image
     image = Image.open(uploaded_file).convert("RGB")
     
-    # Create two columns for the images
-    col1, col2 = st.columns(2)
+    # Resize image to match model input size
+    display_size = (400, 400)  # Increased from 250x250 to 400x400
+    model_size = (224, 224)    # Size for model input
     
-    with col1:
-        st.markdown("<h3>📸 Your Image</h3>", unsafe_allow_html=True)
-        st.image(image, use_column_width=True)
+    # Create display version of the image
+    display_image = image.resize(display_size, Image.Resampling.LANCZOS)
     
-    with col2:
-        # Processing with visual feedback
-        st.markdown("<h3>🔍 Processing</h3>", unsafe_allow_html=True)
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-        
-        # Simulate processing
-        for i in range(101):
-            # Update progress bar
-            progress_bar.progress(i)
-            
-            # Update status text based on progress
-            if i < 30:
-                status_text.text("🧠 Analyzing image content...")
-            elif i < 60:
-                status_text.text("👁️ Identifying objects and context...")
-            elif i < 90:
-                status_text.text("✍️ Generating natural language description...")
-            else:
-                status_text.text("🔮 Finalizing caption...")
-            
-            # Add small delay for animation effect
-            time.sleep(0.02)
-        
-        # Process image with model
-        inp = tfms(image).unsqueeze(0).to(DEVICE)
-        with torch.no_grad():
-            out = model(inp)
-        cls = out.argmax(1).item()
-        caption = SEVERITY_MSG[cls]
-        
-        # Generate Grad-CAM visualization
-        cam = GradCAM(model=model, target_layers=[model.layer4[-1]])
-        gcam = cam(input_tensor=inp, targets=[ClassifierOutputTarget(cls)])[0]
-        rgb = np.array(image.resize((224,224)), dtype=float) / 255
-        vis = show_cam_on_image(rgb, gcam, use_rgb=True)
-        
-        # Show success message
-        status_text.success("✅ Analysis completed successfully!")
-        
-        # Display Grad-CAM visualization without heading
-        st.image(vis, use_column_width=True)
+    # Input Image Section
+    st.markdown("""
+        <div class="section-header" style="text-align: center;">
+            <h2 style="display: inline-block;">📸 Your Image</h2>
+        </div>
+        <div class="center-container">
+            <div class="image-container">
+                <img src="data:image/png;base64,{}"/>
+            </div>
+        </div>
+    """.format(image_to_base64(display_image)), unsafe_allow_html=True)
     
-    # Display results in a new row spanning both columns
-    st.markdown("<h3>🔮 AI Analysis Results</h3>", unsafe_allow_html=True)
+    # Model Analysis Section
+    st.markdown("""
+        <div class="section-header" style="text-align: center;">
+            <h2 style="display: inline-block;">🔍 Model Analysis</h2>
+        </div>
+        <div class="center-container">
+    """, unsafe_allow_html=True)
+    
+    # Progress container
+    st.markdown('<div class="progress-container">', unsafe_allow_html=True)
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    # Simulate processing
+    for i in range(101):
+        progress_bar.progress(i)
+        if i < 30:
+            status_text.text("🧠 Analyzing image content...")
+        elif i < 60:
+            status_text.text("👁️ Identifying objects and context...")
+        elif i < 90:
+            status_text.text("✍️ Generating natural language description...")
+        else:
+            status_text.text("🔮 Finalizing analysis...")
+        time.sleep(0.02)
+    
+    # Process image with model
+    inp = tfms(image).unsqueeze(0).to(DEVICE)
+    with torch.no_grad():
+        out = model(inp)
+    cls = out.argmax(1).item()
+    caption = SEVERITY_MSG[cls]
+    
+    # Generate Grad-CAM visualization
+    cam = GradCAM(model=model, target_layers=[model.layer4[-1]])
+    gcam = cam(input_tensor=inp, targets=[ClassifierOutputTarget(cls)])[0]
+    rgb = np.array(image.resize(model_size), dtype=float) / 255
+    vis = show_cam_on_image(rgb, gcam, use_rgb=True)
+    vis_pil = Image.fromarray((vis * 255).astype(np.uint8))
+    vis_display = vis_pil.resize(display_size, Image.Resampling.LANCZOS)  # Using same display_size as input image
+    
+    # Show success message
+    st.markdown('<div class="status-container">✅ Analysis completed successfully!</div>', unsafe_allow_html=True)
+    
+    # Display Grad-CAM visualization
+    st.markdown("""
+        <div class="center-container">
+            <div class="image-container">
+                <img src="data:image/png;base64,{}"/>
+            </div>
+        </div>
+    """.format(image_to_base64(vis_display)), unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Display results
+    st.markdown("<h3 style='text-align: center;'>🔮 AI Analysis Results</h3>", unsafe_allow_html=True)
     st.markdown(f'<div class="caption-result"><p class="caption-text">"{caption}"</p></div>', unsafe_allow_html=True)
     
     # Single Save Results button with proper alignment
@@ -698,14 +815,12 @@ with st.sidebar:
     language = st.selectbox("Language", ["English", "Spanish", "French", "German", "Japanese"])
     
     st.markdown('<h3 style="color: #e1e1e1; margin: 1.5rem 0 1rem; font-size: 1.3rem; border-bottom: 1px solid rgba(139, 185, 254, 0.2); padding-bottom: 0.5rem;">Quick Navigation</h3>', unsafe_allow_html=True)
-    st.markdown("""
-    <div style="display: flex; flex-direction: column; gap: 0.7rem;">
-        <a href="#home" style="color: #8bb9fe; text-decoration: none; display: flex; align-items: center; padding: 0.5rem; background: rgba(139, 185, 254, 0.1); border-radius: 8px;"><span style="margin-right: 8px;">🏠</span> Home</a>
-        <a href="#about" style="color: #8bb9fe; text-decoration: none; display: flex; align-items: center; padding: 0.5rem; background: rgba(139, 185, 254, 0.1); border-radius: 8px;"><span style="margin-right: 8px;">ℹ️</span> About</a>
-        <a href="https://github.com/your-username/vision-oracle" style="color: #8bb9fe; text-decoration: none; display: flex; align-items: center; padding: 0.5rem; background: rgba(139, 185, 254, 0.1); border-radius: 8px;"><span style="margin-right: 8px;">📚</span> Documentation</a>
-        <a href="#contact" style="color: #8bb9fe; text-decoration: none; display: flex; align-items: center; padding: 0.5rem; background: rgba(139, 185, 254, 0.1); border-radius: 8px;"><span style="margin-right: 8px;">📧</span> Contact</a>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div style="display: flex; flex-direction: column; gap: 0.7rem;">', unsafe_allow_html=True)
+    st.markdown('<a href="#home" style="color: #8bb9fe; text-decoration: none; display: flex; align-items: center; padding: 0.5rem; background: rgba(139, 185, 254, 0.1); border-radius: 8px;"><span style="margin-right: 8px;">🏠</span> Home</a>', unsafe_allow_html=True)
+    st.markdown('<a href="#about" style="color: #8bb9fe; text-decoration: none; display: flex; align-items: center; padding: 0.5rem; background: rgba(139, 185, 254, 0.1); border-radius: 8px;"><span style="margin-right: 8px;">ℹ️</span> About</a>', unsafe_allow_html=True)
+    st.markdown('<a href="https://github.com/your-username/vision-oracle" style="color: #8bb9fe; text-decoration: none; display: flex; align-items: center; padding: 0.5rem; background: rgba(139, 185, 254, 0.1); border-radius: 8px;"><span style="margin-right: 8px;">📚</span> Documentation</a>', unsafe_allow_html=True)
+    st.markdown('<a href="#contact" style="color: #8bb9fe; text-decoration: none; display: flex; align-items: center; padding: 0.5rem; background: rgba(139, 185, 254, 0.1); border-radius: 8px;"><span style="margin-right: 8px;">📧</span> Contact</a>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Add a subtle version info
     st.markdown("""
