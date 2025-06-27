@@ -269,6 +269,7 @@ st.markdown("""
     .feature-card h3 {
         margin-bottom: 1rem;
         font-size: 1.4rem;
+        color: white;
     }
     
     .feature-card p {
@@ -357,6 +358,7 @@ st.markdown("""
     
     .team-member h4 {
         margin-bottom: 0.5rem;
+        color: white;
     }
     
     .team-member p {
@@ -403,6 +405,7 @@ st.markdown("""
         padding: 3rem 2rem;
         border-radius: 15px;
         text-align: center;
+        color: white;
         margin-bottom: 2.5rem;
         border: 1px solid rgba(139, 185, 254, 0.1);
         box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
@@ -520,7 +523,7 @@ st.markdown("""
             <svg height="16" width="16" viewBox="0 0 16 16" fill="white">
                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
             </svg>
-            Documentation
+            Github
         </a>
     </div>
 </div>
@@ -679,10 +682,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("""
-<p>OncoType is a cutting-edge AI application that leverages state-of-the-art deep learning models to generate accurate and natural language descriptions of microscopic images of blood smears. Our mission is to make visual content more accessible and understandable for everyone.</p>
+<p style="color: white;">OncoType is a cutting-edge AI application that leverages state-of-the-art deep learning models to generate accurate and natural language descriptions of microscopic images of blood smears. Our mission is to make visual content more accessible and understandable for everyone.</p>
 
-<p>Our technology can be applied across various medical and research domains, including:</p>
-<ul style="color: #e1e1e1; margin-bottom: 2rem; padding-left: 1.5rem;">
+<p style="color: white;">Our technology can be applied across various medical and research domains, including:</p>
+<ul style="color: white; margin-bottom: 2rem; padding-left: 1.5rem;">
     <li style="margin-bottom: 0.5rem;">Early detection and diagnosis of blood cancers such as leukemia</li>
     <li style="margin-bottom: 0.5rem;">Assisting pathologists in analyzing peripheral blood smear images</li>
     <li style="margin-bottom: 0.5rem;">Supporting medical education and hematology training</li>
